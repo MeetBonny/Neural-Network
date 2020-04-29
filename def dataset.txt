@@ -1,0 +1,35 @@
+def load_my_dataset():
+    cat_image_files = glob.glob('./my_images/cats/*')       # path for positive images
+    noncat_image_files = glob.glob('./my_images/noncats/*') # path for negative images
+
+    cat_images = []
+    noncat_images = []
+    for fname in cat_image_files:
+        img = Image.open(fname)    
+        cat_images.append(np.asarray(img.resize((64,64))))   # size of image (64,64)
+    for fname in noncat_image_files:
+        img = Image.open(fname) 
+        noncat_images.append(np.asarray(img.resize((64,64)))) # size of image (64,64)
+    cat_images = np.asarray(cat_images)  # would be better to load to ndarray directly
+    noncat_images = np.asarray(noncat_images)
+    
+    # noncat_images = np.array([mpimg.imread(fname) for fname in noncat_image_files])
+    all_x = np.concatenate((cat_images, noncat_images), axis=0)
+   
+    sizeDataSet = len(all_x)
+    all_y = np.zeros(sizeDataSet, dtype=np.int)
+    all_y[:len(cat_images)] = 1
+    sizeTrainSet = int(sizeDataSet/2)
+    
+    randomIndicesForTrain = random.sample(range(sizeDataSet), sizeTrainSet)
+    train_set_y = np.asarray([np.take(all_y,randomIndicesForTrain)])
+    mask = np.zeros(sizeDataSet,dtype=bool)   
+    mask[randomIndicesForTrain]=True
+    train_set_x = all_x[mask]
+    test_set_x = all_x[~mask]
+    train_set_y = np.asarray([all_y[mask]])
+    test_set_y = np.asarray([all_y[~mask]])
+
+    my_classes = np.array(['non-myclass', 'myclass']) # define your classes here
+
+    return(train_set_x, train_set_y, test_set_x, test_set_y, my_classes)
